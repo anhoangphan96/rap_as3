@@ -1,0 +1,9 @@
+projection;
+strict ( 2 );
+
+define behavior for ZC_AS3_ZORGBU alias OrganizationBusiness
+{
+  use create;
+  use update;
+  use delete;
+}

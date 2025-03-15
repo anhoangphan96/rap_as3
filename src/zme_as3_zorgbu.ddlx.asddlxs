@@ -1,0 +1,90 @@
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo : {
+        typeName: 'Organization of Business',
+        typeNamePlural: 'Organization of Business',
+        title.value: 'OrgCode',
+        description.value: 'OrgName'
+    }
+annotate entity ZC_AS3_ZORGBU
+    with 
+{
+    @UI.facet: [{
+                   type : #IDENTIFICATION_REFERENCE,
+                   label : 'Organization of Business',
+                   position: 10,
+                   purpose: #STANDARD }]
+
+    @EndUserText.label: 'Company Code'
+    @UI.selectionField: [{ position : 10 }]
+    @UI.lineItem: [{ position : 10 }]
+    @UI.identification: [{ position : 10 }]
+    @Consumption.valueHelpDefinition: [{ entity : { name: 'ZI_BUKRS_VH' , element: 'Bukrs' }, distinctValues: true, useForValidation: true }]
+    @Consumption.filter: { mandatory: true , selectionType: #SINGLE, multipleSelections: false }
+    Bukrs;
+    
+    @EndUserText.label: 'Organization Code'
+    @Consumption.filter.hidden: true
+    @UI.lineItem: [{ position : 20 }]
+    @UI.identification: [{ position : 20  }]
+    OrgCode;
+    
+    @EndUserText.label: 'Organization Code'
+    @UI.selectionField: [{ position : 20 }]
+    @Consumption.valueHelpDefinition: [{ entity : { name: 'ZI_ORG_CODE_VH' , element: 'OrgCode' }, distinctValues: true, useForValidation: true }]
+    OrgCode2;
+    
+    @EndUserText.label: 'Organization ID'
+    @UI.lineItem: [{ position : 30 }]
+    @UI.selectionField: [{ position : 30 }]
+    @UI.identification: [{ position : 30 }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'ZI_ORG_ID_VH' , element: 'value_low' },  distinctValues: true, useForValidation: true }]
+    OrgId;
+    
+    @EndUserText.label: 'Valid From Year/Month'
+    @UI.lineItem: [{ position : 40 }]
+    @UI.identification: [{ position : 40 }]
+    ValidFr;
+    
+    @EndUserText.label: 'Valid End Year/Month'
+    @UI.lineItem: [{ position : 50 }]
+    @UI.identification: [{ position : 50 }]
+    ValidTo;
+    
+    @EndUserText.label: 'Country'
+    @UI.identification: [{ position : 60 }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'I_Country' , element: 'land1' },  distinctValues: true, useForValidation: true }]
+    Land1;
+    
+    @EndUserText.label: 'Pilot'
+    @UI.identification: [{ position : 70 }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'ZI_PILOT_VH' , element: 'value_low' },  distinctValues: true, useForValidation: true }]
+    PilotOd;
+    
+    @EndUserText.label: 'Organization Master'
+    @UI.identification: [{ position : 80 }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'ZI_ORG_MASTER_ID_VH' , element: 'value_low' },  distinctValues: true, useForValidation: true }]
+    OrgMasterId;
+    
+    @EndUserText.label: 'Unit'
+    @UI.identification: [{ position : 90 }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'ZI_UNIT_ID_VH' , element: 'value_low' },  distinctValues: true, useForValidation: true }]
+    UnitId;
+    
+    @EndUserText.label: 'Division Code'
+    @UI.identification: [{ position : 100 }]
+    DivisionCode;
+    
+    @EndUserText.label: 'Business Name'
+    @UI.identification: [{ position :110 }]
+    BusinessName;
+    
+    @EndUserText.label: 'Organization Name'
+    @UI.identification: [{ position : 120 }]
+    OrgName;
+    
+    @UI.selectionField: [{ position : 40 }]
+    @UI.lineItem: [{ position : 60 }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'ZI_STATUS_VH' , element: 'value_low' },  distinctValues: true, useForValidation: true }]
+    Status;
+    
+}

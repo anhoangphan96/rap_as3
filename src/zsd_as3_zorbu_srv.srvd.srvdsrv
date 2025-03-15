@@ -1,0 +1,4 @@
+@EndUserText.label: 'SD for organization business app'
+define service ZSD_AS3_ZORBU_SRV {
+  expose ZC_AS3_ZORGBU as OrganizationBusiness;
+}

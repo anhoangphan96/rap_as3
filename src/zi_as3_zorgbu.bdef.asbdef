@@ -1,0 +1,17 @@
+managed implementation in class zbp_i_as3_zorgbu unique;
+strict ( 2 );
+
+define behavior for ZI_AS3_ZORGBU alias OrganizationBusiness
+persistent table ztorgbu
+lock master
+authorization master ( instance )
+etag master LastChangeAt
+{
+  create;
+  update;
+  delete;
+
+  field ( readonly:update ) Bukrs, OrgId, OrgCode, ValidFr, ValidTo;
+  field ( readonly ) OrgName;
+
+}
