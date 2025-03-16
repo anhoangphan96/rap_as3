@@ -5,10 +5,11 @@
 define root view entity ZC_AS3_ZORGBU
   provider contract transactional_query as projection on ZI_AS3_ZORGBU
 {
-    key Bukrs,
-    key OrgCode,
-    key ValidFr,
-    key ValidTo,
+    Key ID,
+    Bukrs,
+    OrgCode,
+    ValidFr,
+    ValidTo,
     OrgCode2,
     OrgId,
     Land1,

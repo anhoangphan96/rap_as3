@@ -1,9 +1,12 @@
 managed implementation in class zbp_i_as3_zorgbu unique;
 strict ( 2 );
+with draft;
 
 define behavior for ZI_AS3_ZORGBU alias OrganizationBusiness
 persistent table ztorgbu
+draft table ztorgbu_d
 lock master
+total etag LastChangeAt
 authorization master ( instance )
 etag master LastChangeAt
 {
@@ -11,7 +14,44 @@ etag master LastChangeAt
   update;
   delete;
 
+  draft action Activate;
+  draft action Edit;
+  draft action Resume;
+  draft action Discard;
+  draft determine action Prepare;
+
+  field ( readonly, numbering : managed ) ID;
+
   field ( readonly:update ) Bukrs, OrgId, OrgCode, ValidFr, ValidTo;
+
   field ( readonly ) OrgName;
 
+  side effects { field BusinessName affects field OrgName; }
+
+  determination assignOrgName on modify { field BusinessName; }
+
+  mapping for ztorgbu
+{
+    ID             = zzid;
+    Bukrs          = bukrs;
+    OrgCode        = org_code;
+    ValidFr        = valid_fr;
+    ValidTo        = valid_to;
+    OrgId          = org_id;
+    Land1          = land1;
+    PilotOd        = pilot_od;
+    OrgMasterId    = org_master_id;
+    UnitId         = unit_id;
+    DivisionCode   = division_code;
+    BusinessName   = business_name;
+    OrgName        = org_name;
+    Status         = status;
+    Erdat          = erdat;
+    Ernam          = ernam;
+    Aedat          = aedat;
+    Aenam          = aenam;
+    LastChangeAt   = last_change_at;
+}
+
+	
 }

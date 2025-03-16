@@ -4,10 +4,11 @@
 define root view entity ZI_AS3_ZORGBU as select from ztorgbu
 //composition of target_data_source_name as _association_name
 {
-    key bukrs as Bukrs,
-    key org_code as OrgCode,
-    key valid_fr as ValidFr,
-    key valid_to as ValidTo,
+    key zzid as ID,
+    bukrs as Bukrs,
+    org_code as OrgCode,
+    valid_fr as ValidFr,
+    valid_to as ValidTo,
     org_code as OrgCode2,
     org_id as OrgId,
     land1 as Land1,
