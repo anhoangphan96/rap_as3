@@ -3,7 +3,8 @@ strict ( 2 );
 with draft;
 
 define behavior for ZI_AS3_ZORGBU alias OrganizationBusiness
-persistent table ztorgbu
+//persistent table ztorgbu
+with unmanaged save with full data
 draft table ztorgbu_d
 lock master
 total etag LastChangeAt
@@ -22,13 +23,17 @@ etag master LastChangeAt
 
   field ( readonly, numbering : managed ) ID;
 
-  field ( readonly:update ) Bukrs, OrgId, OrgCode, ValidFr, ValidTo;
-
   field ( readonly ) OrgName;
+
+  field ( features : instance ) Bukrs, OrgCode, OrgId, ValidFr, ValidTo;
+  field ( mandatory ) Bukrs, OrgCode, OrgId, ValidFr, ValidTo;
 
   side effects { field BusinessName affects field OrgName; }
 
   determination assignOrgName on modify { field BusinessName; }
+
+  validation checkMonthYear on save  { field ValidFr , ValidTo;  }
+  validation checkUnit on save { field UnitId ;}
 
   mapping for ztorgbu
 {

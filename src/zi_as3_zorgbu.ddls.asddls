@@ -20,9 +20,12 @@ define root view entity ZI_AS3_ZORGBU as select from ztorgbu
     org_name as OrgName,
     status as Status,
     erdat as Erdat,
+    @Semantics.user.createdBy: true
     ernam as Ernam,
     aedat as Aedat,
+    @Semantics.user.lastChangedBy: true
     aenam as Aenam,
+    @Semantics.systemDateTime.lastChangedAt: true
     last_change_at as LastChangeAt
 //    _association_name // Make association public
 }

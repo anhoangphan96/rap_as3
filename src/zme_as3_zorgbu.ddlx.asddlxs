@@ -30,7 +30,7 @@ annotate entity ZC_AS3_ZORGBU
     
     @EndUserText.label: 'Organization Code'
     @UI.selectionField: [{ position : 20 }]
-    @Consumption.valueHelpDefinition: [{ entity : { name: 'ZI_ORG_CODE_VH' , element: 'OrgCode' }, distinctValues: true, useForValidation: true }]
+    @Consumption.valueHelpDefinition: [{ entity : { name: 'ZI_ORG_CODE_VH' , element: 'OrgCode' }, distinctValues: true}]
     OrgCode2;
     
     @EndUserText.label: 'Organization ID'
@@ -43,11 +43,13 @@ annotate entity ZC_AS3_ZORGBU
     @EndUserText.label: 'Valid From Year/Month'
     @UI.lineItem: [{ position : 40 }]
     @UI.identification: [{ position : 40 }]
+    @UI.connectedFields: [{qualifier: 'ValidFrQualifier'}]
     ValidFr;
     
     @EndUserText.label: 'Valid End Year/Month'
     @UI.lineItem: [{ position : 50 }]
     @UI.identification: [{ position : 50 }]
+    @UI.connectedFields: [{qualifier: 'ValidToQualifier'}]
     ValidTo;
     
     @EndUserText.label: 'Country'
