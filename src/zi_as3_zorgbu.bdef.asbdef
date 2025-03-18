@@ -23,17 +23,16 @@ etag master LastChangeAt
 
   field ( readonly, numbering : managed ) ID;
 
-  field ( readonly ) OrgName;
-
   field ( features : instance ) Bukrs, OrgCode, OrgId, ValidFr, ValidTo;
   field ( mandatory ) Bukrs, OrgCode, OrgId, ValidFr, ValidTo;
 
-  side effects { field BusinessName affects field OrgName; }
+  side effects { field BusinessName affects field OrgName;
+                 field OrgId affects field DivisionCode; }
 
   determination assignOrgName on modify { field BusinessName; }
 
   validation checkMonthYear on save  { field ValidFr , ValidTo;  }
-  validation checkUnit on save { field UnitId ;}
+  validation checkUnitId on save { field UnitId; }
 
   mapping for ztorgbu
 {

@@ -14,6 +14,12 @@
      <MSGNR>001</MSGNR>
      <TEXT>This field is wrong format, please correct it by yyyymm</TEXT>
     </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZM_AS3_ZORGBU</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Organization ID = &amp;1, User can only choose value &amp;2</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

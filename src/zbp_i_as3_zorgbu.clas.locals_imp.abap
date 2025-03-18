@@ -69,8 +69,8 @@ CLASS lhc_ZI_AS3_ZORGBU DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys FOR organizationbusiness~checkmonthyear.
     METHODS get_instance_features FOR INSTANCE FEATURES
       IMPORTING keys REQUEST requested_features FOR organizationbusiness RESULT result.
-    METHODS checkunit FOR VALIDATE ON SAVE
-      IMPORTING keys FOR organizationbusiness~checkunit.
+    METHODS checkunitid FOR VALIDATE ON SAVE
+      IMPORTING keys FOR organizationbusiness~checkunitid.
 
 ENDCLASS.
 
@@ -194,7 +194,62 @@ CLASS lhc_ZI_AS3_ZORGBU IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD checkUnit.
+  METHOD checkUnitId.
+    READ ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+  ENTITY OrganizationBusiness
+      FIELDS ( OrgId UnitId )
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_zorgbu).
+
+    READ TABLE lt_zorgbu INTO DATA(ls_zorgbu) INDEX 1.
+    CASE ls_zorgbu-OrgId.
+      WHEN '1'.
+        IF ls_zorgbu-UnitId <> '0'
+            OR ls_zorgbu-UnitId <> '1'.
+          APPEND VALUE #( %tky = ls_zorgbu-%tky ) TO failed-organizationbusiness.
+          reported-organizationbusiness =  VALUE #( BASE reported-organizationbusiness (
+                                                       %tky = ls_zorgbu-%tky
+                                                       %element-unitid = if_abap_behv=>mk-on
+                                                       %msg = new_message( id = 'ZM_AS3_ZORGBU'
+                                                                           number = 002
+                                                                           severity = ms-error
+                                                                           v1 = ls_zorgbu-OrgId
+                                                                           v2 = '0, 1' )
+                                                                           )
+                                                                           ).
+        ENDIF.
+      WHEN '3' OR '4'.
+        IF ls_zorgbu-UnitId <> '0'
+             OR ls_zorgbu-UnitId <> '2'.
+          APPEND VALUE #( %tky = ls_zorgbu-%tky ) TO failed-organizationbusiness.
+          reported-organizationbusiness =  VALUE #( BASE reported-organizationbusiness (
+                                                       %tky = ls_zorgbu-%tky
+                                                       %element-unitid = if_abap_behv=>mk-on
+                                                       %msg = new_message( id = 'ZM_AS3_ZORGBU'
+                                                                           number = 002
+                                                                           severity = ms-error
+                                                                           v1 = ls_zorgbu-OrgId
+                                                                           v2 = '0, 2' )
+                                                                           )
+                                                                           ).
+        ENDIF.
+
+
+      WHEN OTHERS.
+        IF ls_zorgbu-UnitId <> '0'.
+          APPEND VALUE #( %tky = ls_zorgbu-%tky ) TO failed-organizationbusiness.
+          reported-organizationbusiness =  VALUE #( BASE reported-organizationbusiness (
+                                                       %tky = ls_zorgbu-%tky
+                                                       %element-unitid = if_abap_behv=>mk-on
+                                                       %msg = new_message( id = 'ZM_AS3_ZORGBU'
+                                                                           number = 002
+                                                                           severity = ms-error
+                                                                           v1 = ls_zorgbu-OrgId
+                                                                           v2 = '0' )
+                                                                           )
+                                                                           ).
+        ENDIF.
+    ENDCASE.
   ENDMETHOD.
 
 ENDCLASS.
