@@ -1,0 +1,36 @@
+CLASS zcl_test_data DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    INTERFACES if_oo_adt_classrun .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_test_data IMPLEMENTATION.
+
+
+  METHOD if_oo_adt_classrun~main.
+
+    SELECT *
+    FROM ZTORGBU
+    INTO TABLE @DATA(lt_data).
+
+    DELETE ZTORGBU FROM TABLE @lt_data.
+
+        SELECT *
+    FROM ZTORGBU_D
+    INTO TABLE @DATA(lt_data2).
+
+    DELETE ZTORGBU_D FROM TABLE @lt_data2.
+
+
+
+
+  ENDMETHOD.
+ENDCLASS.

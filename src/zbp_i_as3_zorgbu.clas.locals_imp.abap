@@ -19,6 +19,16 @@ CLASS lsc_zi_as3_zorgbu IMPLEMENTATION.
         CLEAR: ls_zorgbu.
         ls_zorgbu = CORRESPONDING #( ls_create ).
         ls_zorgbu-zzid = ls_create-id.
+        ls_zorgbu-org_code = ls_create-OrgCode.
+        ls_zorgbu-valid_fr = ls_create-ValidFr.
+        ls_zorgbu-valid_to = ls_create-ValidTo.
+        ls_zorgbu-org_id   = ls_create-OrgId.
+        ls_zorgbu-pilot_od = ls_create-PilotOd.
+        ls_zorgbu-org_master_id = ls_create-OrgMasterId.
+        ls_zorgbu-unit_id = ls_create-UnitId.
+        ls_zorgbu-division_code = ls_create-DivisionCode.
+        ls_zorgbu-business_name = ls_create-BusinessName.
+        ls_zorgbu-org_name      = ls_create-OrgName.
         ls_zorgbu-last_change_at = ls_create-LastChangeAt.
         ls_zorgbu-erdat = cl_abap_context_info=>get_system_date( ).
         ls_zorgbu-status = '0'.
@@ -34,8 +44,19 @@ CLASS lsc_zi_as3_zorgbu IMPLEMENTATION.
         CLEAR: ls_zorgbu.
         ls_zorgbu = CORRESPONDING #( ls_update ).
         ls_zorgbu-zzid = ls_update-id.
+        ls_zorgbu-org_code = ls_update-OrgCode.
+        ls_zorgbu-valid_fr = ls_update-ValidFr.
+        ls_zorgbu-valid_to = ls_update-ValidTo.
+        ls_zorgbu-org_id   = ls_update-OrgId.
+        ls_zorgbu-pilot_od = ls_update-PilotOd.
+        ls_zorgbu-org_master_id = ls_update-OrgMasterId.
+        ls_zorgbu-unit_id = ls_update-UnitId.
+        ls_zorgbu-division_code = ls_update-DivisionCode.
+        ls_zorgbu-business_name = ls_update-BusinessName.
+        ls_zorgbu-org_name      = ls_update-OrgName.
         ls_zorgbu-last_change_at = ls_update-LastChangeAt.
         ls_zorgbu-aedat = cl_abap_context_info=>get_system_date( ).
+        ls_zorgbu-status = '2'.
         APPEND ls_zorgbu TO lt_zorgbu.
       ENDLOOP.
       UPDATE ztorgbu FROM TABLE @lt_zorgbu.
@@ -71,6 +92,10 @@ CLASS lhc_ZI_AS3_ZORGBU DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys REQUEST requested_features FOR organizationbusiness RESULT result.
     METHODS checkunitid FOR VALIDATE ON SAVE
       IMPORTING keys FOR organizationbusiness~checkunitid.
+    METHODS assigndivcode FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR organizationbusiness~assigndivcode.
+    METHODS approval FOR MODIFY
+      IMPORTING keys FOR ACTION organizationbusiness~approval RESULT result.
 
 ENDCLASS.
 
@@ -189,6 +214,8 @@ CLASS lhc_ZI_AS3_ZORGBU IMPLEMENTATION.
         result_line-%features-%field-ValidTo =  if_abap_behv=>fc-f-unrestricted.
       ENDIF.
 
+      result_line-%action-approval = if_abap_behv=>fc-o-enabled.
+
       APPEND result_line TO result.
 
     ENDLOOP.
@@ -205,7 +232,7 @@ CLASS lhc_ZI_AS3_ZORGBU IMPLEMENTATION.
     CASE ls_zorgbu-OrgId.
       WHEN '1'.
         IF ls_zorgbu-UnitId <> '0'
-            OR ls_zorgbu-UnitId <> '1'.
+            AND ls_zorgbu-UnitId <> '1'.
           APPEND VALUE #( %tky = ls_zorgbu-%tky ) TO failed-organizationbusiness.
           reported-organizationbusiness =  VALUE #( BASE reported-organizationbusiness (
                                                        %tky = ls_zorgbu-%tky
@@ -220,7 +247,7 @@ CLASS lhc_ZI_AS3_ZORGBU IMPLEMENTATION.
         ENDIF.
       WHEN '3' OR '4'.
         IF ls_zorgbu-UnitId <> '0'
-             OR ls_zorgbu-UnitId <> '2'.
+             AND ls_zorgbu-UnitId <> '2'.
           APPEND VALUE #( %tky = ls_zorgbu-%tky ) TO failed-organizationbusiness.
           reported-organizationbusiness =  VALUE #( BASE reported-organizationbusiness (
                                                        %tky = ls_zorgbu-%tky
@@ -250,6 +277,38 @@ CLASS lhc_ZI_AS3_ZORGBU IMPLEMENTATION.
                                                                            ).
         ENDIF.
     ENDCASE.
+  ENDMETHOD.
+
+  METHOD assignDivCode.
+
+    DATA: lt_update TYPE TABLE FOR UPDATE zi_as3_zorgbu.
+
+    READ ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+    ENTITY OrganizationBusiness
+        FIELDS ( OrgId OrgCode )
+        WITH CORRESPONDING #( keys )
+        RESULT DATA(lt_zorgbu).
+
+    lt_update = CORRESPONDING #( lt_zorgbu ).
+    IF lt_update IS NOT INITIAL.
+      READ TABLE lt_update ASSIGNING FIELD-SYMBOL(<lfs_update>) INDEX 1.
+      IF <lfs_update>-OrgId = '1'.
+        <lfs_update>-DivisionCode = ''.
+      ELSEIF <lfs_update>-OrgId = '3' OR <lfs_update>-OrgId = '4'.
+        <lfs_update>-DivisionCode = <lfs_update>-OrgCode.
+      ELSE.
+      ENDIF.
+
+      MODIFY ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+      ENTITY OrganizationBusiness
+          UPDATE FIELDS ( DivisionCode )
+          WITH lt_update.
+
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD approval.
+
   ENDMETHOD.
 
 ENDCLASS.

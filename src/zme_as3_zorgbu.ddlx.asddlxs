@@ -13,11 +13,10 @@ annotate entity ZC_AS3_ZORGBU
                    label : 'Organization of Business',
                    position: 10,
                    purpose: #STANDARD }]
-
+    @UI.lineItem: [{ position : 10 },  { type: #FOR_ACTION, dataAction: 'approval', label: 'Approve' }     ]
     @EndUserText.label: 'Company Code'
     @UI.selectionField: [{ position : 10 }]
-    @UI.lineItem: [{ position : 10 }]
-    @UI.identification: [{ position : 10 }]
+    @UI.identification: [{ position : 10 }, { type: #FOR_ACTION, dataAction: 'approval', label: 'Approve' } ]
     @Consumption.valueHelpDefinition: [{ entity : { name: 'ZI_BUKRS_VH' , element: 'Bukrs' }, distinctValues: true, useForValidation: true }]
     @Consumption.filter: { mandatory: true , selectionType: #SINGLE, multipleSelections: false }
     Bukrs;
@@ -37,7 +36,7 @@ annotate entity ZC_AS3_ZORGBU
     @UI.lineItem: [{ position : 30 }]
     @UI.selectionField: [{ position : 30 }]
     @UI.identification: [{ position : 30 }]
-    @Consumption.valueHelpDefinition: [{ entity: {name: 'ZI_ORG_ID_VH' , element: 'value_low' },  distinctValues: true, useForValidation: true }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'ZI_ORG_ID_VH' , element: 'value_low' },   useForValidation: true }]
     OrgId;
     
     @EndUserText.label: 'Valid From Year/Month'
@@ -54,7 +53,7 @@ annotate entity ZC_AS3_ZORGBU
     
     @EndUserText.label: 'Country'
     @UI.identification: [{ position : 60 }]
-    @Consumption.valueHelpDefinition: [{ entity: {name: 'I_Country' , element: 'land1' },  distinctValues: true, useForValidation: true }]
+    @Consumption.valueHelpDefinition: [{ entity: {name: 'I_CountryVH' , element: 'Country' },  distinctValues: true, useForValidation: true }]
     Land1;
     
     @EndUserText.label: 'Pilot'
