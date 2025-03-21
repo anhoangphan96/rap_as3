@@ -13,9 +13,9 @@ etag master LastChangeAt
 {
   create;
   update;
-  delete;
+  delete ( features : instance );
 
-  draft action Activate;
+  draft action Activate optimized ;
   draft action Edit;
   draft action Resume;
   draft action Discard;
@@ -36,8 +36,10 @@ etag master LastChangeAt
 
   validation checkMonthYear on save  { field ValidFr , ValidTo;  }
   validation checkUnitId on save { field UnitId; }
+  validation checkDivCode on save { field DivisionCode; }
 
-  action ( features : instance ) approval  result [1] $self;
+//  factory action  ( features : instance ) approval [1]  ;
+   action ( features: instance ) approval result [0..*] $self;
 
   mapping for ztorgbu
 {

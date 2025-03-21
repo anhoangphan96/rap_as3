@@ -31,7 +31,9 @@ CLASS lsc_zi_as3_zorgbu IMPLEMENTATION.
         ls_zorgbu-org_name      = ls_create-OrgName.
         ls_zorgbu-last_change_at = ls_create-LastChangeAt.
         ls_zorgbu-erdat = cl_abap_context_info=>get_system_date( ).
-        ls_zorgbu-status = '0'.
+        IF ls_zorgbu-status IS INITIAL.
+            ls_zorgbu-status = '0'.
+        ENDIF.
         APPEND ls_zorgbu TO lt_zorgbu.
       ENDLOOP.
 
@@ -56,7 +58,9 @@ CLASS lsc_zi_as3_zorgbu IMPLEMENTATION.
         ls_zorgbu-org_name      = ls_update-OrgName.
         ls_zorgbu-last_change_at = ls_update-LastChangeAt.
         ls_zorgbu-aedat = cl_abap_context_info=>get_system_date( ).
-        ls_zorgbu-status = '2'.
+        IF ls_update-%control-Status = if_abap_behv=>mk-off.
+            ls_zorgbu-status = '2'.
+        ENDIF.
         APPEND ls_zorgbu TO lt_zorgbu.
       ENDLOOP.
       UPDATE ztorgbu FROM TABLE @lt_zorgbu.
@@ -94,8 +98,11 @@ CLASS lhc_ZI_AS3_ZORGBU DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys FOR organizationbusiness~checkunitid.
     METHODS assigndivcode FOR DETERMINE ON MODIFY
       IMPORTING keys FOR organizationbusiness~assigndivcode.
-    METHODS approval FOR MODIFY
-      IMPORTING keys FOR ACTION organizationbusiness~approval RESULT result.
+
+    METHODS checkdivcode FOR VALIDATE ON SAVE
+      IMPORTING keys FOR organizationbusiness~checkdivcode.
+*    METHODS approval FOR MODIFY
+*      IMPORTING keys FOR ACTION organizationbusiness~approval.
 
 ENDCLASS.
 
@@ -206,15 +213,41 @@ CLASS lhc_ZI_AS3_ZORGBU IMPLEMENTATION.
         result_line-%features-%field-OrgId =  if_abap_behv=>fc-f-read_only .
         result_line-%features-%field-ValidFr =  if_abap_behv=>fc-f-read_only .
         result_line-%features-%field-ValidTo =  if_abap_behv=>fc-f-read_only .
+        result_line-%delete = if_abap_behv=>fc-o-enabled.
       ELSE.
         result_line-%features-%field-Bukrs = if_abap_behv=>fc-f-unrestricted.
         result_line-%features-%field-OrgCode =  if_abap_behv=>fc-f-unrestricted.
         result_line-%features-%field-OrgId =  if_abap_behv=>fc-f-unrestricted.
         result_line-%features-%field-ValidFr =  if_abap_behv=>fc-f-unrestricted.
         result_line-%features-%field-ValidTo =  if_abap_behv=>fc-f-unrestricted.
+        result_line-%action-approval =  if_abap_behv=>fc-o-disabled.
       ENDIF.
 
-      result_line-%action-approval = if_abap_behv=>fc-o-enabled.
+
+*      Check enable/disable for delete action (apply to draft and active instance)
+      SELECT SINGLE *
+          FROM ztorgbu
+          WHERE zzid = @key-id
+          INTO @DATA(ls_ztorgbu).
+
+      IF sy-subrc = 0.
+        CASE ls_ztorgbu-status.
+          WHEN '0'.
+            result_line-%delete = if_abap_behv=>fc-o-enabled.
+            result_line-%action-approval = if_abap_behv=>fc-o-enabled.
+          WHEN '1'.
+            result_line-%delete = if_abap_behv=>fc-o-disabled.
+            result_line-%action-approval = if_abap_behv=>fc-o-disabled.
+          WHEN '2'.
+            result_line-%delete = if_abap_behv=>fc-o-disabled.
+            result_line-%action-approval = if_abap_behv=>fc-o-enabled.
+          WHEN ''.
+            result_line-%delete = if_abap_behv=>fc-o-enabled.
+            result_line-%action-approval =  if_abap_behv=>fc-o-disabled.
+        ENDCASE.
+      ELSE.
+        result_line-%delete = if_abap_behv=>fc-o-enabled.
+      ENDIF.
 
       APPEND result_line TO result.
 
@@ -307,8 +340,151 @@ CLASS lhc_ZI_AS3_ZORGBU IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD approval.
+*  METHOD approval.
+*
+*    DATA: lt_create_orgbu TYPE TABLE FOR CREATE zi_as3_zorgbu,
+*          lt_create_orgbu2 TYPE TABLE FOR CREATE zi_as3_zorgbu,
+*          lt_delete_orgbu TYPE TABLE FOR DELETE zi_as3_zorgbu,
+*          lt_update_orgbu TYPE STANDARD TABLE OF ztorgbu,
+*          lv_date         TYPE d.
+*
+*   " remove travel instances with initial %cid (i.e., not set by caller API)
+*   READ TABLE keys WITH KEY %cid = '' INTO DATA(key_with_inital_cid).
+*   ASSERT key_with_inital_cid IS INITIAL.
+*
+*    READ ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+*      ENTITY OrganizationBusiness
+*         ALL FIELDS WITH
+*         CORRESPONDING #( keys )
+*       RESULT DATA(lt_ztorgbu).
+*
+*
+*    IF lt_ztorgbu IS NOT INITIAL.
+*
+*      lt_create_orgbu = CORRESPONDING #( lt_ztorgbu ).
+*      LOOP AT lt_create_orgbu ASSIGNING FIELD-SYMBOL(<lfs_ztorgbu>).
+*        SELECT *
+*            FROM ztorgbu
+*            WHERE bukrs = @<lfs_ztorgbu>-bukrs
+*              AND org_code = @<lfs_ztorgbu>-OrgCode
+*              AND status = '1'
+*              AND valid_to = '999912'
+*          INTO TABLE @DATA(lt_zorgbuold).
+*
+*
+*
+*        IF sy-subrc = 0 .
+*
+*
+*          <lfs_ztorgbu>-%cid = keys[ KEY entity %key = <lfs_ztorgbu>-%key ]-%cid .
+*          lv_date = |{ <lfs_ztorgbu>-ValidFr }01| .
+*          lv_date -= 1.
+*          <lfs_ztorgbu>-Status = '1'.
+*          <lfs_ztorgbu>-ValidTo = '999912'.
+*          lt_delete_orgbu = VALUE #( BASE lt_delete_orgbu ( id = <lfs_ztorgbu>-id ) ).
+*
+*          READ ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+*          ENTITY OrganizationBusiness
+*             ALL FIELDS WITH VALUE #(  (  %key-id = lt_zorgbuold[ 1 ]-zzid ) )
+*           RESULT DATA(lt_ztorgbu_old).
+*
+*          lt_create_orgbu2 = CORRESPONDING #( lt_ztorgbu_old ).
+*          READ TABLE lt_create_orgbu2 ASSIGNING FIELD-SYMBOL(<lfs_zorgbu_old>) INDEX 1 .
+*          IF sy-subrc = 0.
+*              <lfs_zorgbu_old>-%cid = keys[ KEY entity %key = <lfs_zorgbu_old>-%key ]-%cid .
+*              <lfs_zorgbu_old>-ValidTo = |{ lv_date(4) }{ lv_date+4(2) }|.
+*              lt_delete_orgbu = VALUE #( BASE lt_delete_orgbu ( id =  <lfs_zorgbu_old>-id ) ).
+*          ENDIF.
+*
+*
+*          TRY.
+*              <lfs_ztorgbu>-id =  cl_system_uuid=>create_uuid_x16_static(   ).
+*              <lfs_zorgbu_old>-id = cl_system_uuid=>create_uuid_x16_static(   ).
+*            CATCH cx_uuid_error.
+*              "handle exception
+*          ENDTRY.
+*
+*        ELSE.
+*          <lfs_ztorgbu>-%cid = keys[ KEY entity %key = <lfs_ztorgbu>-%key ]-%cid .
+*          <lfs_ztorgbu>-Status = '1'.
+*          <lfs_ztorgbu>-ValidTo = '999912'.
+*          lt_delete_orgbu = VALUE #( BASE lt_delete_orgbu ( id = <lfs_ztorgbu>-id ) ).
+*          TRY.
+*              <lfs_ztorgbu>-id =  cl_system_uuid=>create_uuid_x16_static(   ).
+*            CATCH cx_uuid_error.
+*              "handle exception
+*          ENDTRY.
+*
+*        ENDIF.
+*      ENDLOOP.
+*
+*
+*      MODIFY ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+*                ENTITY OrganizationBusiness
+*                DELETE FROM lt_delete_orgbu.
+*
+*      MODIFY ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+*        ENTITY OrganizationBusiness
+*        CREATE
+*        SET FIELDS WITH lt_create_orgbu2.
+*
+*      MODIFY ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+*                ENTITY OrganizationBusiness
+*                CREATE
+*                SET FIELDS WITH lt_create_orgbu
+*                MAPPED DATA(lt_mapped)
+*                FAILED DATA(lt_failed)
+*                REPORTED DATA(lt_reported).
+*
+*      mapped-organizationbusiness = lt_mapped-organizationbusiness.
+*    ENDIF.
+*
+*
+*
+*  ENDMETHOD.
 
+  METHOD checkDivCode.
+
+    READ ENTITIES OF zi_as3_zorgbu IN LOCAL MODE
+    ENTITY OrganizationBusiness
+        FIELDS ( OrgId DivisionCode OrgCode )
+        WITH CORRESPONDING #( keys )
+        RESULT DATA(lt_zorgbu).
+
+    READ TABLE lt_zorgbu INTO DATA(ls_zorgbu) INDEX 1.
+    CASE ls_zorgbu-OrgId.
+      WHEN '1'.
+        IF ls_zorgbu-DivisionCode IS NOT INITIAL.
+          APPEND VALUE #( %tky = ls_zorgbu-%tky ) TO failed-organizationbusiness.
+          reported-organizationbusiness =  VALUE #( BASE reported-organizationbusiness (
+                                                       %tky = ls_zorgbu-%tky
+                                                       %element-divisioncode = if_abap_behv=>mk-on
+                                                       %msg = new_message( id = 'ZM_AS3_ZORGBU'
+                                                                           number = 003
+                                                                           severity = ms-error
+                                                                           v1 = ls_zorgbu-OrgId
+                                                                           v2 = 'Division Code must be blank' )
+                                                                           )
+                                                                           ).
+        ENDIF.
+      WHEN '3' OR '4'.
+        IF ls_zorgbu-DivisionCode <> ls_zorgbu-OrgCode.
+          APPEND VALUE #( %tky = ls_zorgbu-%tky ) TO failed-organizationbusiness.
+          reported-organizationbusiness =  VALUE #( BASE reported-organizationbusiness (
+                                                       %tky = ls_zorgbu-%tky
+                                                       %element-divisioncode = if_abap_behv=>mk-on
+                                                       %msg = new_message( id = 'ZM_AS3_ZORGBU'
+                                                                           number = 003
+                                                                           severity = ms-error
+                                                                           v1 = ls_zorgbu-OrgId
+                                                                           v2 = 'Division Code must be same as Org Code' )
+                                                                           )
+                                                                           ).
+        ENDIF.
+
+
+      WHEN OTHERS.
+    ENDCASE.
   ENDMETHOD.
 
 ENDCLASS.
